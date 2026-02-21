@@ -1,4 +1,5 @@
 import numpy as np
+
 from simfast.strings import pairwise_strings, topk_strings
 
 

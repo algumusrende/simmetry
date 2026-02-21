@@ -1,7 +1,11 @@
 from __future__ import annotations
+
 import time
+
 import numpy as np
+
 from simfast import pairwise, topk
+
 
 def main():
     X = np.random.randn(5000, 128)

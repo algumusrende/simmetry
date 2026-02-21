@@ -33,7 +33,6 @@ def manhattan_sim(a, b) -> float:
 
 
 def pearson(a, b) -> float:
-    """Pearson correlation in [-1,1]."""
     a = np.asarray(a, dtype=np.float64)
     b = np.asarray(b, dtype=np.float64)
     if a.size != b.size:

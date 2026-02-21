@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Iterable, Set, TypeVar
+from collections.abc import Iterable
+from typing import TypeVar
 
 T = TypeVar("T")
 
 
-def _to_set(x: Iterable[T]) -> Set[T]:
+def _to_set(x: Iterable[T]) -> set[T]:
     return x if isinstance(x, set) else set(x)
 
 

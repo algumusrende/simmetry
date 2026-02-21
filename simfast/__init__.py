@@ -2,17 +2,14 @@ from __future__ import annotations
 
 from .api import pairwise, similarity, topk
 from .index import SimIndex
-from .registry import available, get, register
-
-# Import metric implementations
 from .points.core import euclidean_2d, haversine_km
+from .registry import available, get, register
 from .sets.core import dice, jaccard, overlap
 from .strings.jaro import jaro_winkler
 from .strings.levenshtein import levenshtein
 from .strings.ngrams import ngram_jaccard, token_jaccard
 from .vectors.core import cosine, dot, euclidean_sim, manhattan_sim, pearson
 
-# Register built-ins
 register("cosine", cosine, kind="vector")
 register("dot", dot, kind="vector")
 register("euclidean_sim", euclidean_sim, kind="vector")

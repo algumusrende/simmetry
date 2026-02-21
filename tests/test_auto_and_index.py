@@ -1,4 +1,5 @@
 import numpy as np
+
 from simfast import SimIndex, similarity
 
 
@@ -6,6 +7,11 @@ def test_auto_string_similarity():
     s = similarity("akbank", "ak bank", metric="auto")
     assert 0.0 <= s <= 1.0
     assert s > 0.7
+
+
+def test_auto_empty_string_batch():
+    out = similarity([], [], metric="auto")
+    assert out.shape == (0, 0)
 
 
 def test_auto_set_similarity():
@@ -35,3 +41,14 @@ def test_simindex_exact():
     idx, scores = SimIndex(metric="cosine", backend="exact").add(X).query(X[0], k=5)
     assert len(idx) == 5
     assert scores[0] >= scores[-1]
+
+
+def test_simindex_query_dim_mismatch_message():
+    X = np.random.randn(20, 8).astype("float32")
+    index = SimIndex(metric="cosine", backend="exact").add(X)
+    try:
+        index.query(np.random.randn(7).astype("float32"), k=3)
+    except ValueError as e:
+        assert "Query dimension mismatch" in str(e)
+    else:
+        raise AssertionError("Expected ValueError for dimension mismatch.")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping, Optional, Sequence, Tuple, Union
+from collections.abc import Mapping
+from typing import Any
 
 import numpy as np
 
@@ -16,7 +17,6 @@ def _is_number(x: Any) -> bool:
 
 
 def _is_vector_like(x: Any) -> bool:
-    # list/tuple/np 1d of numbers
     if isinstance(x, np.ndarray):
         return x.ndim == 1 and np.issubdtype(x.dtype, np.number)
     if isinstance(x, (list, tuple)) and len(x) > 0:
@@ -43,7 +43,8 @@ def _is_set_like(x: Any) -> bool:
 
 
 def _auto_metric(a: Any, b: Any) -> str:
-    # Order matters: be conservative.
+    if _is_string_seq(a) and _is_string_seq(b):
+        return "jaro_winkler"
     if _is_string(a) and _is_string(b):
         return "jaro_winkler"
     if _is_point_like(a) and _is_point_like(b):
@@ -58,27 +59,13 @@ def _auto_metric(a: Any, b: Any) -> str:
 def similarity(
     a: Any,
     b: Any,
-    metric: Union[str, Mapping[str, str], None] = "auto",
+    metric: str | Mapping[str, str] | None = "auto",
     *,
-    weights: Optional[Mapping[str, float]] = None,
+    weights: Mapping[str, float] | None = None,
 ) -> Any:
-    """Compute similarity between objects.
-
-    - If metric is a string: use registered metric.
-    - If metric is None or 'auto': choose a reasonable default based on input types.
-    - If a and b are sequences:
-        - string sequences => returns pairwise matrix (np.ndarray)
-        - numeric matrices => returns pairwise matrix (np.ndarray)
-    - If a and b are dicts and metric is a mapping:
-        compute weighted composite similarity over fields.
-
-    Returns:
-      float for scalar inputs, np.ndarray for batch inputs.
-    """
     if metric is None or (isinstance(metric, str) and metric.lower().strip() == "auto"):
         metric = _auto_metric(a, b)
 
-    # Composite similarity for dict-like records
     if isinstance(metric, Mapping) and isinstance(a, Mapping) and isinstance(b, Mapping):
         total_w = 0.0
         total = 0.0
@@ -95,28 +82,24 @@ def similarity(
 
     metric = metric.lower().strip()
 
-    # Batch: string lists
     if _is_string_seq(a) and _is_string_seq(b):
         from .strings.pairwise import pairwise_strings
-        return pairwise_strings(a, b, metric=metric if metric != "auto" else "jaro_winkler")
+        return pairwise_strings(a, b, metric=metric)
 
-    # Batch: numeric matrices
     if _is_matrix_like(a) and _is_matrix_like(b):
         return pairwise(a, b, metric=metric)
 
-    # Scalar dispatch
     m = get(metric)
     return float(m.fn(a, b))
 
 
 def pairwise(X, Y=None, metric: str = "cosine"):
-    """Pairwise similarity matrix for vector metrics (NumPy-optimized)."""
     from .vectors.pairwise import pairwise_numpy
+
     return pairwise_numpy(X, Y, metric=metric)
 
 
-def topk(query, X, k: int = 10, metric: str = "cosine") -> Tuple[np.ndarray, np.ndarray]:
-    """Exact top-k for vectors using pairwise()."""
+def topk(query, X, k: int = 10, metric: str = "cosine") -> tuple[np.ndarray, np.ndarray]:
     S = pairwise(np.asarray(query), X, metric=metric).reshape(-1)
     k = int(k)
     if k <= 0:

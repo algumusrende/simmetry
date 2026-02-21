@@ -6,12 +6,12 @@ The format is based on **Keep a Changelog**, and this project adheres to **Seman
 
 ## [1.0.1] - 2026-02-21
 ### Added
-- GitHub Actions CI (tests on Linux/macOS/Windows, Python 3.10–3.13).
-- Build job producing sdist + wheel and uploading artifacts.
-- Release checklist for PyPI.
+- Optional Numba acceleration for `pairwise(..., metric="euclidean_sim" | "manhattan_sim")` when installed via `simfast[fast]`.
 
 ### Changed
-- Updated `pyproject.toml` metadata
+- Improved validation and error messages for vector dimension mismatches.
+- Fixed `similarity([], [], metric="auto")` to route to string similarity batch behavior.
+- Project cleanup for public/PyPI release packaging.
 
 ## [1.0.0] - 2026-02-21
 ### Added

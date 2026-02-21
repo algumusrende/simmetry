@@ -1,9 +1,11 @@
+import importlib
+
 import pytest
 
 
 def test_ann_imports():
-    # module import should work even if optional deps aren't installed
-    import simfast.ann  # noqa: F401
+    mod = importlib.import_module("simfast.ann")
+    assert mod is not None
 
 
 def test_hnsw_raises_helpful_error():

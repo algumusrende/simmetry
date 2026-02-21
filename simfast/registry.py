@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any
 
 MetricFn = Callable[[Any, Any], float]
 
@@ -10,10 +11,10 @@ MetricFn = Callable[[Any, Any], float]
 class Metric:
     name: str
     fn: MetricFn
-    kind: str  # "string" | "vector" | "point" | "set" | "generic"
+    kind: str
 
 
-_REGISTRY: Dict[str, Metric] = {}
+_REGISTRY: dict[str, Metric] = {}
 
 
 def register(name: str, fn: MetricFn, kind: str = "generic") -> None:
@@ -30,7 +31,7 @@ def get(name: str) -> Metric:
     return _REGISTRY[key]
 
 
-def available(kind: Optional[str] = None) -> Tuple[str, ...]:
+def available(kind: str | None = None) -> tuple[str, ...]:
     if kind is None:
         return tuple(sorted(_REGISTRY.keys()))
     kind = kind.lower().strip()

@@ -9,7 +9,6 @@ def levenshtein_distance(a: str, b: str) -> int:
     if not b:
         return len(a)
 
-    # Ensure b is shorter => less memory
     if len(a) < len(b):
         a, b = b, a
 
@@ -26,7 +25,6 @@ def levenshtein_distance(a: str, b: str) -> int:
 
 
 def levenshtein(a: str, b: str) -> float:
-    """Normalized Levenshtein similarity in [0,1]."""
     d = levenshtein_distance(a, b)
     m = max(len(a), len(b))
     return 1.0 if m == 0 else 1.0 - (d / m)

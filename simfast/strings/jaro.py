@@ -30,7 +30,6 @@ def _jaro(a: str, b: str) -> float:
     if matches == 0:
         return 0.0
 
-    # transpositions
     t = 0
     j = 0
     for i in range(la):
@@ -47,11 +46,9 @@ def _jaro(a: str, b: str) -> float:
 
 
 def jaro_winkler(a: str, b: str, prefix_scale: float = 0.1, max_prefix: int = 4) -> float:
-    """Jaro-Winkler similarity in [0,1]."""
     j = _jaro(a, b)
-    # common prefix length
     p = 0
-    for ca, cb in zip(a, b):
+    for ca, cb in zip(a, b, strict=False):
         if ca != cb:
             break
         p += 1

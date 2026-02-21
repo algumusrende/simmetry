@@ -2,7 +2,6 @@ from simfast import similarity
 
 
 def test_haversine_similarity_range():
-    # Istanbul-ish points; similarity should be less than 1 but > 0
     a = (41.0082, 28.9784)
     b = (41.015, 28.95)
     s = similarity(a, b, "haversine_km")

@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import Iterable, Set
 
-
-def _ngrams(s: str, n: int) -> Set[str]:
+def _ngrams(s: str, n: int) -> set[str]:
     if n <= 0:
         raise ValueError("n must be >= 1")
     if len(s) < n:
@@ -12,7 +10,6 @@ def _ngrams(s: str, n: int) -> Set[str]:
 
 
 def ngram_jaccard(a: str, b: str, n: int = 3) -> float:
-    """Jaccard similarity over character n-gram sets."""
     A = _ngrams(a, n)
     B = _ngrams(b, n)
     if not A and not B:
@@ -25,7 +22,6 @@ def ngram_jaccard(a: str, b: str, n: int = 3) -> float:
 
 
 def token_jaccard(a: str, b: str) -> float:
-    """Jaccard similarity over whitespace token sets."""
     A = set(a.split())
     B = set(b.split())
     if not A and not B:

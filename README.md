@@ -9,6 +9,8 @@ pip install simfast
 pip install "simfast[fast]"
 ```
 
+`simfast[fast]` enables optional Numba acceleration for `pairwise(..., metric="euclidean_sim")` and `pairwise(..., metric="manhattan_sim")`.
+
 ## Quickstart
 
 ### One function

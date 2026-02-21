@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal, Optional, Tuple
+from typing import Literal
 
 import numpy as np
 
 
 def _require_hnswlib():
     try:
-        import hnswlib  # type: ignore
-    except Exception as e:  # pragma: no cover
+        import hnswlib
+    except Exception as e:
         raise ImportError(
             'hnswlib is not installed. Install with: pip install "simfast[ann-hnsw]"'
         ) from e
@@ -18,14 +18,12 @@ def _require_hnswlib():
 
 @dataclass
 class HNSWIndex:
-    """Thin wrapper around hnswlib.Index with a stable, friendly API."""
-
     dim: int
     space: Literal["cosine", "l2", "ip"]
     index: object
     n_items: int
 
-    def query(self, q, k: int = 10) -> Tuple[np.ndarray, np.ndarray]:
+    def query(self, q, k: int = 10) -> tuple[np.ndarray, np.ndarray]:
         q = np.asarray(q, dtype=np.float32)
         if q.ndim == 1:
             q = q.reshape(1, -1)
@@ -40,12 +38,6 @@ def build_hnsw(
     M: int = 16,
     ef: int = 50,
 ) -> HNSWIndex:
-    """Build an HNSW ANN index for vectors.
-
-    Notes:
-    - For space="cosine", hnswlib uses cosine distance (smaller is closer).
-    - You can keep your core package dependency-free; this is an optional extra.
-    """
     hnswlib = _require_hnswlib()
     X = np.asarray(X, dtype=np.float32)
     if X.ndim != 2:
