@@ -3,7 +3,7 @@ requires = ["hatchling>=1.24"]
 build-backend = "hatchling.build"
 
 [project]
-name = "simfast"
+name = "simmetry"
 version = "1.0.1"
 description = "Blazing-fast similarity scores for strings, vectors, points, and sets."
 readme = "README.md"
@@ -49,11 +49,11 @@ ann = [
 ]
 
 [project.urls]
-Homepage = "https://pypi.org/project/simfast/"
-Repository = "https://github.com/algumusrende/simfast"
+Homepage = "https://pypi.org/project/simmetry/"
+Repository = "https://github.com/algumusrende/simmetry"
 
 [tool.hatch.build.targets.wheel]
-packages = ["simfast"]
+packages = ["simmetry"]
 
 [tool.ruff]
 line-length = 100

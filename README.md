@@ -1,21 +1,21 @@
-# simfast
+# simmetry
 
 Blazing-fast similarity scores for **strings**, **vectors**, **points**, and **sets** — with a simple API.
 
 ## Install
 
 ```bash
-pip install simfast
-pip install "simfast[fast]"
+pip install simmetry
+pip install "simmetry[fast]"
 ```
 
-`simfast[fast]` enables optional Numba acceleration for `pairwise(..., metric="euclidean_sim")` and `pairwise(..., metric="manhattan_sim")`.
+`simmetry[fast]` enables optional Numba acceleration for `pairwise(..., metric="euclidean_sim")` and `pairwise(..., metric="manhattan_sim")`.
 
 ## Quickstart
 
 ### One function
 ```python
-from simfast import similarity
+from simmetry import similarity
 
 similarity("kitten", "sitting", metric="levenshtein")     
 similarity([1,2,3], [1,2,4], metric="cosine")             
@@ -26,7 +26,7 @@ similarity({1,2,3}, {2,3,4}, metric="jaccard")
 ### Pairwise matrices (fast for vectors)
 ```python
 import numpy as np
-from simfast import pairwise
+from simmetry import pairwise
 
 X = np.random.randn(1000, 128)
 S = pairwise(X, metric="cosine")          
@@ -35,7 +35,7 @@ S = pairwise(X, metric="cosine")
 ### Top-k search
 ```python
 import numpy as np
-from simfast import topk
+from simmetry import topk
 
 X = np.random.randn(5000, 64)
 q = np.random.randn(64)
@@ -45,7 +45,7 @@ idx, scores = topk(q, X, k=10, metric="cosine")
 ## Available metrics
 
 ```python
-from simfast import available
+from simmetry import available
 available()             
 available("vector")     
 available("string")     
@@ -76,7 +76,7 @@ MIT
 If you need many string-to-string similarities (e.g., deduping names), use:
 
 ```python
-from simfast.strings import pairwise_strings, topk_strings
+from simmetry.strings import pairwise_strings, topk_strings
 
 S = pairwise_strings(["item_one", "item_two"], ["item_one", "item_alt"], metric="jaro_winkler")
 idx, scores = topk_strings("samplecorp", ["samplecorp", "examplefinance", "testgroup"], k=2, metric="levenshtein")
@@ -88,12 +88,12 @@ For very large vector corpora (100k+), exact `topk()` can be slow. ANN gives fas
 
 ### hnswlib (recommended)
 ```bash
-pip install "simfast[ann-hnsw]"
+pip install "simmetry[ann-hnsw]"
 ```
 
 ```python
 import numpy as np
-from simfast.ann import build_hnsw
+from simmetry.ann import build_hnsw
 
 X = np.random.randn(200_000, 128).astype("float32")
 X /= np.linalg.norm(X, axis=1, keepdims=True)  
@@ -104,12 +104,12 @@ labels, distances = index.query(X[0], k=10)
 
 ### faiss
 ```bash
-pip install "simfast[ann-faiss]"
+pip install "simmetry[ann-faiss]"
 ```
 
 ```python
 import numpy as np
-from simfast.ann import build_faiss
+from simmetry.ann import build_faiss
 
 X = np.random.randn(200_000, 128).astype("float32")
 X /= np.linalg.norm(X, axis=1, keepdims=True)  
@@ -125,7 +125,7 @@ Exact search (no extras):
 
 ```python
 import numpy as np
-from simfast import SimIndex
+from simmetry import SimIndex
 
 X = np.random.randn(50_000, 128).astype("float32")
 index = SimIndex(metric="cosine", backend="exact").add(X)
@@ -136,12 +136,12 @@ idx, scores = index.query(X[0], k=10)
 ANN (optional):
 
 ```bash
-pip install "simfast[ann-hnsw]"
+pip install "simmetry[ann-hnsw]"
 ```
 
 ```python
 import numpy as np
-from simfast import SimIndex
+from simmetry import SimIndex
 
 X = np.random.randn(200_000, 128).astype("float32")
 X /= np.linalg.norm(X, axis=1, keepdims=True)
@@ -155,7 +155,7 @@ labels, distances = index.query(X[0], k=10)
 Auto metric selection:
 
 ```python
-from simfast import similarity
+from simmetry import similarity
 
 similarity("samplecorp", "sample corp")
 similarity((41.0, 29.0), (41.1, 29.1)) 

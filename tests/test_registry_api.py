@@ -1,6 +1,6 @@
 import numpy as np
 
-from simfast import available, similarity
+from simmetry import available, similarity
 
 
 def test_available_has_some_metrics():

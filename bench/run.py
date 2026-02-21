@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 
-from simfast import pairwise, topk
+from simmetry import pairwise, topk
 
 
 def main():

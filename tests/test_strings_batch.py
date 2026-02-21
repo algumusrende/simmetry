@@ -1,6 +1,6 @@
 import numpy as np
 
-from simfast.strings import pairwise_strings, topk_strings
+from simmetry.strings import pairwise_strings, topk_strings
 
 
 def test_pairwise_strings_shape():

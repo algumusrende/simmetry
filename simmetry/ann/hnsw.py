@@ -11,7 +11,7 @@ def _require_hnswlib():
         import hnswlib
     except Exception as e:
         raise ImportError(
-            'hnswlib is not installed. Install with: pip install "simfast[ann-hnsw]"'
+            'hnswlib is not installed. Install with: pip install "simmetry[ann-hnsw]"'
         ) from e
     return hnswlib
 

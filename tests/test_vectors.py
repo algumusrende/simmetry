@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from simfast import pairwise, similarity, topk
+from simmetry import pairwise, similarity, topk
 
 
 def test_pairwise_cosine_shape():

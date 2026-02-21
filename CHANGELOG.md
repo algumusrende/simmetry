@@ -1,12 +1,12 @@
 # Changelog
 
-All notable changes to **simfast** will be documented in this file.
+All notable changes to **simmetry** will be documented in this file.
 
 The format is based on **Keep a Changelog**, and this project adheres to **Semantic Versioning**.
 
 ## [1.0.1] - 2026-02-21
 ### Added
-- Optional Numba acceleration for `pairwise(..., metric="euclidean_sim" | "manhattan_sim")` when installed via `simfast[fast]`.
+- Optional Numba acceleration for `pairwise(..., metric="euclidean_sim" | "manhattan_sim")` when installed via `simmetry[fast]`.
 
 ### Changed
 - Improved validation and error messages for vector dimension mismatches.

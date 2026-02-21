@@ -1,6 +1,6 @@
 import numpy as np
 
-from simfast import SimIndex, similarity
+from simmetry import SimIndex, similarity
 
 
 def test_auto_string_similarity():

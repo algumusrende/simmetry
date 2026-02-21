@@ -11,7 +11,7 @@ def _require_faiss():
         import faiss
     except Exception as e:
         raise ImportError(
-            'faiss is not installed. Install with: pip install "simfast[ann-faiss]"'
+            'faiss is not installed. Install with: pip install "simmetry[ann-faiss]"'
         ) from e
     return faiss
 

@@ -1,4 +1,4 @@
-from simfast import similarity
+from simmetry import similarity
 
 
 def test_haversine_similarity_range():
