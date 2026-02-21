@@ -4,7 +4,7 @@ from simfast import SimIndex, similarity
 
 
 def test_auto_string_similarity():
-    s = similarity("akbank", "ak bank", metric="auto")
+    s = similarity("samplecorp", "sample corp", metric="auto")
     assert 0.0 <= s <= 1.0
     assert s > 0.7
 
@@ -25,8 +25,8 @@ def test_auto_point_similarity():
 
 
 def test_composite_dict_similarity():
-    a = {"name": "Ali Can", "loc": (41.0, 29.0)}
-    b = {"name": "Ali Can Gumus", "loc": (41.0, 29.1)}
+    a = {"name": "Entity One", "loc": (41.0, 29.0)}
+    b = {"name": "Entity One Extended", "loc": (41.0, 29.1)}
     score = similarity(
         a,
         b,

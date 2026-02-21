@@ -9,7 +9,7 @@ description = "Blazing-fast similarity scores for strings, vectors, points, and 
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Ali Can Gumusrende", email = "alican.gumusrende@gmail.com" }]
+authors = [{ name = "Ali Can Gumusrende", email = "algumusrende@gmail.com" }]
 keywords = ["similarity", "distance", "cosine", "levenshtein", "jaccard", "haversine"]
 classifiers = [
   "Development Status :: 3 - Alpha",

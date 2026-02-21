@@ -78,8 +78,8 @@ If you need many string-to-string similarities (e.g., deduping names), use:
 ```python
 from simfast.strings import pairwise_strings, topk_strings
 
-S = pairwise_strings(["ali", "veli"], ["ali", "val"], metric="jaro_winkler")
-idx, scores = topk_strings("akbank", ["akbank", "isbank", "yapikredi"], k=2, metric="levenshtein")
+S = pairwise_strings(["item_one", "item_two"], ["item_one", "item_alt"], metric="jaro_winkler")
+idx, scores = topk_strings("samplecorp", ["samplecorp", "examplefinance", "testgroup"], k=2, metric="levenshtein")
 ```
 
 ## ANN top-k (optional, does NOT bloat core)
@@ -157,7 +157,7 @@ Auto metric selection:
 ```python
 from simfast import similarity
 
-similarity("akbank", "ak bank")      
+similarity("samplecorp", "sample corp")
 similarity((41.0, 29.0), (41.1, 29.1)) 
 similarity({1,2,3}, {2,3,4})         
 ```
@@ -165,8 +165,8 @@ similarity({1,2,3}, {2,3,4})
 Composite similarity over dict fields:
 
 ```python
-a = {"name": "Ali Can", "city": "Istanbul", "loc": (41.0, 29.0)}
-b = {"name": "Ali Can Gumus", "city": "İstanbul", "loc": (41.01, 28.99)}
+a = {"name": "Entity One", "city": "CityAlpha", "loc": (41.0, 29.0)}
+b = {"name": "Entity One Extended", "city": "CityAlpha", "loc": (41.01, 28.99)}
 
 score = similarity(
     a, b,

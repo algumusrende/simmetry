@@ -11,7 +11,7 @@ def test_pairwise_strings_shape():
 
 
 def test_topk_strings_returns_sorted():
-    corpus = ["akbank", "isbank", "yapikredi", "garanti"]
-    idx, scores = topk_strings("akbank", corpus, k=3, metric="levenshtein")
+    corpus = ["samplecorp", "examplefinance", "testgroup", "demoorg"]
+    idx, scores = topk_strings("samplecorp", corpus, k=3, metric="levenshtein")
     assert len(idx) == 3
     assert scores[0] >= scores[1] >= scores[2]
