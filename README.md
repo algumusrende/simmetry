@@ -19,7 +19,7 @@ pip install "simmetry[fast]"
 ## Project Status
 
 - Current package: [`simmetry` on PyPI](https://pypi.org/project/simmetry/)
-- Current version in this repo: `1.0.1`
+- Current version in this repo: `1.0.2`
 - Maturity: **Alpha** (API may change; pin exact/minor versions in production)
 - Versioning: semantic versioning target, but pre-hardening changes may still occur in minor releases until `1.x` stabilizes
 
@@ -81,6 +81,8 @@ available("set")
 ### Points / Geo
 - `euclidean_2d`
 - `haversine_km`
+- `pairwise_points`
+- `topk_points`
 
 ### Sets
 - `jaccard`, `dice`, `overlap`
@@ -124,6 +126,16 @@ idx, scores = topk_strings(
     k=2,
     metric="levenshtein",
 )
+```
+
+## Batch Point APIs (Geo / 2D)
+
+```python
+from simmetry.points import pairwise_points, topk_points
+
+pts = [(41.0, 29.0), (41.01, 29.01), (40.9, 28.9)]
+S = pairwise_points(pts, metric="haversine_km")
+idx, scores = topk_points((41.0, 29.0), pts, k=2, metric="haversine_km")
 ```
 
 ## ANN Top-k (Optional)
@@ -200,7 +212,6 @@ Current focus is a compact core with predictable APIs and optional ANN.
 Planned additions (not implemented yet):
 
 - String metrics: Hamming, BM25-style text ranking helpers, string-level Sorensen-Dice variants
-- Point APIs: batch pairwise/top-k utilities for geo points
 - Published comparative benchmarks (RapidFuzz / sklearn / faiss baselines)
 - Hosted docs site
 

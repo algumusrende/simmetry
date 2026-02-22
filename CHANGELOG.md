@@ -4,6 +4,14 @@ All notable changes to **simmetry** will be documented in this file.
 
 The format is based on **Keep a Changelog**, and this project adheres to **Semantic Versioning**.
 
+## [1.0.2] - 2026-02-22
+### Added
+- Point batch APIs: `simmetry.points.pairwise_points()` and `simmetry.points.topk_points()`.
+- README examples for batch geo/point similarity.
+
+### Changed
+- Release alignment workflow: PyPI and GitHub releases will track the same version tag.
+
 ## [1.0.1] - 2026-02-21
 ### Added
 - Optional Numba acceleration for `pairwise(..., metric="euclidean_sim" | "manhattan_sim")` when installed via `simmetry[fast]`.
