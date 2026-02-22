@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .api import pairwise, similarity, topk
+from .api import infer_metric, pairwise, similarity, topk
 from .index import SimIndex
 from .points.core import euclidean_2d, haversine_km
 from .registry import available, get, register
@@ -30,6 +30,7 @@ register("overlap", overlap, kind="set")
 
 __all__ = [
     "similarity",
+    "infer_metric",
     "SimIndex",
     "pairwise",
     "topk",

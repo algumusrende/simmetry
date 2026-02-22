@@ -1,12 +1,19 @@
 import numpy as np
 
-from simmetry import SimIndex, similarity
+from simmetry import SimIndex, infer_metric, similarity
 
 
 def test_auto_string_similarity():
     s = similarity("samplecorp", "sample corp", metric="auto")
     assert 0.0 <= s <= 1.0
     assert s > 0.7
+
+
+def test_infer_metric_examples():
+    assert infer_metric("foo", "bar") == "jaro_winkler"
+    assert infer_metric([], []) == "jaro_winkler"
+    assert infer_metric((41.0, 29.0), (41.01, 29.01)) == "haversine_km"
+    assert infer_metric({1, 2}, {2, 3}) == "jaccard"
 
 
 def test_auto_empty_string_batch():

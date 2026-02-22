@@ -56,6 +56,10 @@ def _auto_metric(a: Any, b: Any) -> str:
     return "cosine"
 
 
+def infer_metric(a: Any, b: Any) -> str:
+    return _auto_metric(a, b)
+
+
 def similarity(
     a: Any,
     b: Any,
@@ -64,7 +68,7 @@ def similarity(
     weights: Mapping[str, float] | None = None,
 ) -> Any:
     if metric is None or (isinstance(metric, str) and metric.lower().strip() == "auto"):
-        metric = _auto_metric(a, b)
+        metric = infer_metric(a, b)
 
     if isinstance(metric, Mapping) and isinstance(a, Mapping) and isinstance(b, Mapping):
         total_w = 0.0
