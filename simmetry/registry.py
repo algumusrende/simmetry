@@ -18,6 +18,7 @@ _REGISTRY: dict[str, Metric] = {}
 
 
 def register(name: str, fn: MetricFn, kind: str = "generic") -> None:
+    """Register a metric function under a unique name."""
     key = name.lower().strip()
     if key in _REGISTRY:
         raise ValueError(f"Metric already registered: {name}")
@@ -25,6 +26,7 @@ def register(name: str, fn: MetricFn, kind: str = "generic") -> None:
 
 
 def get(name: str) -> Metric:
+    """Return a registered metric definition by name."""
     key = name.lower().strip()
     if key not in _REGISTRY:
         raise KeyError(f"Unknown metric: {name}. Available: {sorted(_REGISTRY.keys())}")
@@ -32,6 +34,7 @@ def get(name: str) -> Metric:
 
 
 def available(kind: str | None = None) -> tuple[str, ...]:
+    """Return registered metric names, optionally filtered by kind."""
     if kind is None:
         return tuple(sorted(_REGISTRY.keys()))
     kind = kind.lower().strip()

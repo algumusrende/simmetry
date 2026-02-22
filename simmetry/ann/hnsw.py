@@ -18,12 +18,14 @@ def _require_hnswlib():
 
 @dataclass
 class HNSWIndex:
+    """Thin wrapper around an ``hnswlib.Index`` instance."""
     dim: int
     space: Literal["cosine", "l2", "ip"]
     index: object
     n_items: int
 
     def query(self, q, k: int = 10) -> tuple[np.ndarray, np.ndarray]:
+        """Return top-k labels and distances for a query vector."""
         q = np.asarray(q, dtype=np.float32)
         if q.ndim == 1:
             q = q.reshape(1, -1)
@@ -38,6 +40,7 @@ def build_hnsw(
     M: int = 16,
     ef: int = 50,
 ) -> HNSWIndex:
+    """Build and return an HNSW index for a 2D float vector matrix."""
     hnswlib = _require_hnswlib()
     X = np.asarray(X, dtype=np.float32)
     if X.ndim != 2:

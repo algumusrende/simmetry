@@ -21,6 +21,7 @@ def pairwise_strings(
     B: Sequence[str] | None = None,
     metric: str = "levenshtein",
 ) -> np.ndarray:
+    """Return a pairwise string similarity matrix for the selected metric."""
     metric = metric.lower().strip()
     if metric not in _STRING_METRICS:
         raise KeyError(f"Unknown string metric for pairwise_strings: {metric}")
@@ -46,6 +47,7 @@ def topk_strings(
     k: int = 10,
     metric: str = "levenshtein",
 ) -> tuple[np.ndarray, np.ndarray]:
+    """Return exact top-k string matches by scoring against the full corpus."""
     S = pairwise_strings([query], corpus, metric=metric).reshape(-1)
     k = int(k)
     if k <= 0:

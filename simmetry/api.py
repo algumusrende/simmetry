@@ -57,6 +57,7 @@ def _auto_metric(a: Any, b: Any) -> str:
 
 
 def infer_metric(a: Any, b: Any) -> str:
+    """Return the metric name that ``similarity(..., metric="auto")`` would use."""
     return _auto_metric(a, b)
 
 
@@ -67,6 +68,14 @@ def similarity(
     *,
     weights: Mapping[str, float] | None = None,
 ) -> Any:
+    """Compute similarity for scalar, batch, or composite record inputs.
+
+    Supported behaviors:
+    - scalar values with an explicit metric (or ``metric="auto"``)
+    - string batches (list/tuple of strings) -> string pairwise matrix
+    - numeric matrices (2D NumPy arrays) -> vector pairwise matrix
+    - composite mappings when ``metric`` is a field->metric mapping
+    """
     if metric is None or (isinstance(metric, str) and metric.lower().strip() == "auto"):
         metric = infer_metric(a, b)
 
@@ -98,12 +107,14 @@ def similarity(
 
 
 def pairwise(X, Y=None, metric: str = "cosine"):
+    """Return a vector pairwise similarity matrix."""
     from .vectors.pairwise import pairwise_numpy
 
     return pairwise_numpy(X, Y, metric=metric)
 
 
 def topk(query, X, k: int = 10, metric: str = "cosine") -> tuple[np.ndarray, np.ndarray]:
+    """Return exact top-k indices and scores for a query vector over ``X``."""
     S = pairwise(np.asarray(query), X, metric=metric).reshape(-1)
     k = int(k)
     if k <= 0:

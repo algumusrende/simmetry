@@ -16,12 +16,14 @@ def _normalize_rows(X: np.ndarray) -> np.ndarray:
 
 @dataclass
 class SimIndex:
+    """Unified vector similarity index with exact and optional ANN backends."""
     metric: str = "cosine"
     backend: Literal["exact", "hnsw", "faiss"] = "exact"
     X: np.ndarray | None = None
     _ann: Any = None
 
     def add(self, X) -> SimIndex:
+        """Store vectors and build the selected backend index."""
         X = as_2d(X).astype(np.float32, copy=False)
         self.X = X
         if self.backend == "exact":
@@ -50,6 +52,7 @@ class SimIndex:
         raise ValueError(f"Unknown backend: {self.backend}")
 
     def query(self, q, k: int = 10) -> tuple[np.ndarray, np.ndarray]:
+        """Query the index and return ``(indices, scores_or_distances)``."""
         if self.X is None:
             raise ValueError("Index is empty. Call add(X) first.")
         qv = np.asarray(q, dtype=np.float32)

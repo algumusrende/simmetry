@@ -18,12 +18,14 @@ def _require_faiss():
 
 @dataclass
 class FaissIndex:
+    """Thin wrapper around a Faiss flat index."""
     dim: int
     metric: Literal["l2", "ip"]
     index: object
     n_items: int
 
     def query(self, q, k: int = 10) -> tuple[np.ndarray, np.ndarray]:
+        """Return top-k labels and distances/scores for a query vector."""
         q = np.asarray(q, dtype=np.float32)
         if q.ndim == 1:
             q = q.reshape(1, -1)
@@ -32,6 +34,7 @@ class FaissIndex:
 
 
 def build_faiss(X, metric: Literal["l2", "ip"] = "ip") -> FaissIndex:
+    """Build and return a Faiss flat index for a 2D float vector matrix."""
     faiss = _require_faiss()
     X = np.asarray(X, dtype=np.float32)
     if X.ndim != 2:

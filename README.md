@@ -2,7 +2,7 @@
 
 Similarity scores for **strings**, **vectors**, **points**, and **sets** with a small, NumPy-first API.
 
-[PyPI (simmetry)](https://pypi.org/project/simmetry/) | [Docs source](https://github.com/algumusrende/simmetry/tree/main/docs) | [Benchmarks](./bench/README.md)
+[PyPI (simmetry)](https://pypi.org/project/simmetry/)
 
 ## Install
 
@@ -193,35 +193,16 @@ Run locally:
 python bench/run.py
 ```
 
-Benchmark notes and methodology: [`bench/README.md`](./bench/README.md)
-
 ## Scope and Roadmap
 
 Current focus is a compact core with predictable APIs and optional ANN.
 
-Planned / requested additions (not implemented yet):
+Planned additions (not implemented yet):
 
 - String metrics: Hamming, BM25-style text ranking helpers, string-level Sorensen-Dice variants
 - Point APIs: batch pairwise/top-k utilities for geo points
 - Published comparative benchmarks (RapidFuzz / sklearn / faiss baselines)
-- Hosted docs site (MkDocs docs are included in `docs/`, not deployed yet)
-
-## Documentation
-
-A docs site scaffold is included:
-
-- `mkdocs.yml`
-- `docs/index.md`
-- `docs/api.md`
-- `docs/auto-metric.md`
-- `docs/benchmarks.md`
-- `docs/stability.md`
-
-You can preview locally after installing MkDocs:
-
-```bash
-mkdocs serve
-```
+- Hosted docs site
 
 ## License
 

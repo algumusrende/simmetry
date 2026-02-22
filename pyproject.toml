@@ -37,11 +37,6 @@ dev = [
   "pytest>=8.0",
   "ruff>=0.4",
 ]
-docs = [
-  "mkdocs>=1.6",
-  "mkdocs-material>=9.5",
-]
-
 ann-hnsw = [
   "hnswlib>=0.8.0",
 ]
@@ -55,7 +50,6 @@ ann = [
 [project.urls]
 Homepage = "https://pypi.org/project/simmetry/"
 Repository = "https://github.com/algumusrende/simmetry"
-Documentation = "https://github.com/algumusrende/simmetry/tree/main/docs"
 
 [tool.hatch.build.targets.wheel]
 packages = ["simmetry"]
