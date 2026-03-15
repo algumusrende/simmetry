@@ -27,7 +27,7 @@ def pairwise_points(
     B: Sequence[tuple[float, float]] | None = None,
     metric: str = "haversine_km",
 ) -> np.ndarray:
-    """Return a pairwise similarity matrix for point inputs."""
+    """Return a pairwise point metric matrix for point inputs."""
     metric = metric.lower().strip()
     if metric not in _POINT_METRICS:
         raise KeyError(f"Unknown point metric for pairwise_points: {metric}")
@@ -58,6 +58,10 @@ def topk_points(
     if k <= 0:
         raise ValueError("k must be >= 1")
     k = min(k, S.shape[0])
-    idx = np.argpartition(-S, kth=k - 1)[:k]
-    idx = idx[np.argsort(-S[idx])]
+    if metric.lower().strip() == "haversine_km":
+        idx = np.argpartition(S, kth=k - 1)[:k]
+        idx = idx[np.argsort(S[idx])]
+    else:
+        idx = np.argpartition(-S, kth=k - 1)[:k]
+        idx = idx[np.argsort(-S[idx])]
     return idx, S[idx]

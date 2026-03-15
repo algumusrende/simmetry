@@ -24,5 +24,4 @@ def haversine_km(a: tuple[float, float], b: tuple[float, float]) -> float:
     c = 2.0 * math.asin(min(1.0, math.sqrt(h)))
 
     R = 6371.0088
-    dist_km = R * c
-    return 1.0 / (1.0 + dist_km)
+    return R * c

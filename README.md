@@ -19,7 +19,7 @@ pip install "simmetry[fast]"
 ## Project Status
 
 - Current package: [`simmetry` on PyPI](https://pypi.org/project/simmetry/)
-- Current version in this repo: `1.0.2`
+- Current version in this repo: `1.0.3`
 - Maturity: **Alpha** (API may change; pin exact/minor versions in production)
 - Versioning: semantic versioning target, but pre-hardening changes may still occur in minor releases until `1.x` stabilizes
 
@@ -35,6 +35,8 @@ similarity([1, 2, 3], [1, 2, 4], metric="cosine")
 similarity((41.1, 29.0), (41.2, 29.1), metric="haversine_km")
 similarity({1, 2, 3}, {2, 3, 4}, metric="jaccard")
 ```
+
+`haversine_km` returns geographic distance in kilometers.
 
 ### Pairwise matrices (vectors)
 

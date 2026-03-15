@@ -4,6 +4,12 @@ All notable changes to **simmetry** will be documented in this file.
 
 The format is based on **Keep a Changelog**, and this project adheres to **Semantic Versioning**.
 
+## [1.0.3] - 2026-03-15
+### Changed
+- `haversine_km` now returns geographic distance in kilometers instead of a normalized similarity score.
+- `topk_points(..., metric="haversine_km")` now ranks by nearest distance first.
+- Updated point tests and README examples to match the distance-based behavior.
+
 ## [1.0.2] - 2026-02-22
 ### Added
 - Point batch APIs: `simmetry.points.pairwise_points()` and `simmetry.points.topk_points()`.
