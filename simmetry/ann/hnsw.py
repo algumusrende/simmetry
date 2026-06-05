@@ -19,13 +19,22 @@ def _require_hnswlib():
 @dataclass
 class HNSWIndex:
     """Thin wrapper around an ``hnswlib.Index`` instance."""
+
     dim: int
     space: Literal["cosine", "l2", "ip"]
     index: object
     n_items: int
 
     def query(self, q, k: int = 10) -> tuple[np.ndarray, np.ndarray]:
-        """Return top-k labels and distances for a query vector."""
+        """Return ``(labels, distances)`` for the k nearest neighbours of ``q``.
+
+        Distance semantics depend on the space:
+        - ``cosine``: 1 - cosine_similarity
+        - ``l2``: squared Euclidean distance
+        - ``ip``: negative inner product (or 1 - ip for normalized vectors)
+
+        ``SimIndex`` converts these to similarities automatically.
+        """
         q = np.asarray(q, dtype=np.float32)
         if q.ndim == 1:
             q = q.reshape(1, -1)
@@ -40,7 +49,15 @@ def build_hnsw(
     M: int = 16,
     ef: int = 50,
 ) -> HNSWIndex:
-    """Build and return an HNSW index for a 2D float vector matrix."""
+    """Build and return an HNSW index from a 2D float array.
+
+    Args:
+        X: Array of shape (n, dim).
+        space: Distance space — ``cosine``, ``l2``, or ``ip``.
+        ef_construction: Build-time search width (higher = better recall, slower build).
+        M: Number of bidirectional links per node.
+        ef: Query-time search width (higher = better recall, slower query).
+    """
     hnswlib = _require_hnswlib()
     X = np.asarray(X, dtype=np.float32)
     if X.ndim != 2:

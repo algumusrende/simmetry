@@ -31,7 +31,6 @@ if njit is not None:
                 out[i, j] = 1.0 / (1.0 + np.sqrt(s))
         return out
 
-
     @njit(cache=True, fastmath=True, parallel=True)
     def _manhattan_sim_numba(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
         m, d = X.shape
@@ -47,6 +46,11 @@ if njit is not None:
 
 
 def pairwise_numpy(X, Y=None, metric: str = "cosine") -> np.ndarray:
+    """Return an (m, n) pairwise similarity matrix for vector inputs.
+
+    Supported metrics: ``cosine``, ``dot``, ``euclidean_sim``, ``manhattan_sim``,
+    ``pearson``, ``hamming``, ``cosine_distance``.
+    """
     X = as_2d(X).astype(np.float64, copy=False)
     Y = X if Y is None else as_2d(Y).astype(np.float64, copy=False)
     if X.shape[1] != Y.shape[1]:
@@ -61,6 +65,11 @@ def pairwise_numpy(X, Y=None, metric: str = "cosine") -> np.ndarray:
         Yn = _normalize_rows(Y)
         return Xn @ Yn.T
 
+    if metric == "cosine_distance":
+        Xn = _normalize_rows(X)
+        Yn = _normalize_rows(Y)
+        return 1.0 - Xn @ Yn.T
+
     if metric == "dot":
         return X @ Y.T
 
@@ -74,8 +83,7 @@ def pairwise_numpy(X, Y=None, metric: str = "cosine") -> np.ndarray:
     if metric == "manhattan_sim":
         if njit is not None:
             return _manhattan_sim_numba(X, Y)
-        diff = np.abs(X[:, None, :] - Y[None, :, :])
-        d = np.sum(diff, axis=2)
+        d = np.sum(np.abs(X[:, None, :] - Y[None, :, :]), axis=2)
         return 1.0 / (1.0 + d)
 
     if metric == "pearson":
@@ -85,4 +93,8 @@ def pairwise_numpy(X, Y=None, metric: str = "cosine") -> np.ndarray:
         Yn = _normalize_rows(Yc)
         return Xn @ Yn.T
 
-    raise KeyError(f"pairwise not implemented for metric={metric}")
+    if metric == "hamming":
+        mismatches = (X[:, None, :] != Y[None, :, :]).astype(np.float64)
+        return 1.0 - mismatches.mean(axis=2)
+
+    raise KeyError(f"pairwise not implemented for metric='{metric}'.")

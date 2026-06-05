@@ -2,6 +2,7 @@ from __future__ import annotations
 
 
 def levenshtein_distance(a: str, b: str) -> int:
+    """Minimum edit distance (insertions, deletions, substitutions) between two strings."""
     if a == b:
         return 0
     if not a:
@@ -25,6 +26,7 @@ def levenshtein_distance(a: str, b: str) -> int:
 
 
 def levenshtein(a: str, b: str) -> float:
+    """Normalized Levenshtein similarity in [0, 1]; 1.0 = identical strings."""
     d = levenshtein_distance(a, b)
     m = max(len(a), len(b))
     return 1.0 if m == 0 else 1.0 - (d / m)

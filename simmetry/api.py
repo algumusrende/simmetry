@@ -31,7 +31,15 @@ def _is_matrix_like(x: Any) -> bool:
 
 
 def _is_point_like(x: Any) -> bool:
-    return isinstance(x, (tuple, list)) and len(x) == 2 and all(_is_number(v) for v in x)
+    """Return True for tuples of exactly 2 numbers with valid lat/lon ranges.
+
+    Restricted to ``tuple`` (not ``list``) to avoid ambiguity with 2D numeric
+    vectors. Values outside [-90, 90] × [-180, 180] fall through to ``cosine``.
+    """
+    if not (isinstance(x, tuple) and len(x) == 2 and all(_is_number(v) for v in x)):
+        return False
+    lat, lon = float(x[0]), float(x[1])
+    return -90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0
 
 
 def _is_string_seq(x: Any) -> bool:
@@ -48,7 +56,7 @@ def _auto_metric(a: Any, b: Any) -> str:
     if _is_string(a) and _is_string(b):
         return "jaro_winkler"
     if _is_point_like(a) and _is_point_like(b):
-        return "haversine_km"
+        return "haversine_sim"
     if _is_set_like(a) and _is_set_like(b):
         return "jaccard"
     if _is_vector_like(a) and _is_vector_like(b):
@@ -57,7 +65,16 @@ def _auto_metric(a: Any, b: Any) -> str:
 
 
 def infer_metric(a: Any, b: Any) -> str:
-    """Return the metric name that ``similarity(..., metric="auto")`` would use."""
+    """Return the metric name that ``similarity(..., metric="auto")`` would select.
+
+    Selection order:
+    1. ``list[str]`` / ``tuple[str]`` (including empty) → ``jaro_winkler``
+    2. ``str`` + ``str`` → ``jaro_winkler``
+    3. ``tuple`` of 2 numbers with valid lat/lon range → ``haversine_sim``
+    4. ``set`` / ``frozenset`` → ``jaccard``
+    5. numeric vectors → ``cosine``
+    6. fallback → ``cosine``
+    """
     return _auto_metric(a, b)
 
 
@@ -68,23 +85,37 @@ def similarity(
     *,
     weights: Mapping[str, float] | None = None,
 ) -> Any:
-    """Compute similarity for scalar, batch, or composite record inputs.
+    """Compute similarity between two inputs.
 
-    Supported behaviors:
-    - scalar values with an explicit metric (or ``metric="auto"``)
-    - string batches (list/tuple of strings) -> string pairwise matrix
-    - numeric matrices (2D NumPy arrays) -> vector pairwise matrix
-    - composite mappings when ``metric`` is a field->metric mapping
+    Supports:
+    - Scalar values with an explicit or auto-selected metric.
+    - String sequences (``list[str]`` / ``tuple[str]``) → pairwise similarity matrix.
+    - 2D NumPy arrays → vector pairwise similarity matrix.
+    - Composite dict records when ``metric`` is a ``{field: metric_name}`` mapping.
+
+    Args:
+        a: First input.
+        b: Second input.
+        metric: Metric name, ``"auto"`` / ``None`` for automatic selection, or a
+            ``{field: metric_name}`` mapping for composite records.
+        weights: ``{field: weight}`` mapping used with composite record metrics.
+
+    Returns:
+        A float similarity score, or an ndarray for batch inputs.
     """
     if metric is None or (isinstance(metric, str) and metric.lower().strip() == "auto"):
         metric = infer_metric(a, b)
 
     if isinstance(metric, Mapping) and isinstance(a, Mapping) and isinstance(b, Mapping):
+        missing = [f for f in metric if f not in a or f not in b]
+        if missing:
+            raise KeyError(
+                f"Fields {missing} appear in the metric mapping but are absent from one or "
+                f"both records. Record keys: a={sorted(a.keys())}, b={sorted(b.keys())}."
+            )
         total_w = 0.0
         total = 0.0
         for field, mname in metric.items():
-            if field not in a or field not in b:
-                continue
             w = float(weights.get(field, 1.0)) if weights is not None else 1.0
             total += w * float(get(mname).fn(a[field], b[field]))
             total_w += w
@@ -106,19 +137,44 @@ def similarity(
     return float(m.fn(a, b))
 
 
-def pairwise(X, Y=None, metric: str = "cosine"):
-    """Return a vector pairwise similarity matrix."""
-    from .vectors.pairwise import pairwise_numpy
+def pairwise(X, Y=None, metric: str = "cosine") -> np.ndarray:
+    """Return a pairwise similarity matrix for vector inputs.
 
+    Args:
+        X: Array of shape (m, d) or (d,).
+        Y: Array of shape (n, d) or (d,). Defaults to ``X`` (self-similarity).
+        metric: Vector metric name.
+
+    Returns:
+        ndarray of shape (m, n).
+    """
+    from .vectors.pairwise import pairwise_numpy
     return pairwise_numpy(X, Y, metric=metric)
 
 
-def topk(query, X, k: int = 10, metric: str = "cosine") -> tuple[np.ndarray, np.ndarray]:
-    """Return exact top-k indices and scores for a query vector over ``X``."""
+def topk(
+    query,
+    X,
+    k: int = 10,
+    metric: str = "cosine",
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return exact top-k indices and scores for a query vector over ``X``.
+
+    Results are sorted by score descending (highest similarity first).
+
+    Args:
+        query: 1D query vector of shape (d,).
+        X: Corpus array of shape (n, d).
+        k: Number of results to return.
+        metric: Vector metric name.
+
+    Returns:
+        ``(indices, scores)`` both of length k, sorted descending.
+    """
     S = pairwise(np.asarray(query), X, metric=metric).reshape(-1)
     k = int(k)
     if k <= 0:
-        raise ValueError("k must be >= 1")
+        raise ValueError("k must be >= 1.")
     k = min(k, S.shape[0])
     idx = np.argpartition(-S, kth=k - 1)[:k]
     idx = idx[np.argsort(-S[idx])]

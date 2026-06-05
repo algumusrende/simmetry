@@ -19,13 +19,21 @@ def _require_faiss():
 @dataclass
 class FaissIndex:
     """Thin wrapper around a Faiss flat index."""
+
     dim: int
     metric: Literal["l2", "ip"]
     index: object
     n_items: int
 
     def query(self, q, k: int = 10) -> tuple[np.ndarray, np.ndarray]:
-        """Return top-k labels and distances/scores for a query vector."""
+        """Return ``(labels, distances)`` for the k nearest neighbours of ``q``.
+
+        Distance semantics depend on the metric:
+        - ``l2``: squared Euclidean distance (``IndexFlatL2``)
+        - ``ip``: inner product / cosine similarity for normalized vectors (``IndexFlatIP``)
+
+        ``SimIndex`` converts these to similarities automatically.
+        """
         q = np.asarray(q, dtype=np.float32)
         if q.ndim == 1:
             q = q.reshape(1, -1)
@@ -34,7 +42,12 @@ class FaissIndex:
 
 
 def build_faiss(X, metric: Literal["l2", "ip"] = "ip") -> FaissIndex:
-    """Build and return a Faiss flat index for a 2D float vector matrix."""
+    """Build and return a Faiss flat index from a 2D float array.
+
+    Args:
+        X: Array of shape (n, dim).
+        metric: ``l2`` for ``IndexFlatL2``; ``ip`` for ``IndexFlatIP``.
+    """
     faiss = _require_faiss()
     X = np.asarray(X, dtype=np.float32)
     if X.ndim != 2:
