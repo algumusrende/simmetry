@@ -51,6 +51,7 @@ ann = [
 [project.urls]
 Homepage = "https://github.com/algumusrende/simmetry"
 Repository = "https://github.com/algumusrende/simmetry"
+Documentation = "https://algumusrende.github.io/simmetry/"
 Changelog = "https://github.com/algumusrende/simmetry/blob/main/CHANGELOG.md"
 "Bug Tracker" = "https://github.com/algumusrende/simmetry/issues"
 
