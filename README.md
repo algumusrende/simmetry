@@ -259,23 +259,11 @@ register("exact_match", my_metric, kind="generic")
 similarity("foo", "foo", metric="exact_match")  # 1.0
 ```
 
-## Benchmarks
-
-The project includes a benchmark harness in [`bench/run.py`](./bench/run.py).
-Comparative benchmarks against `rapidfuzz`, `scikit-learn`, and ANN libraries
-are not yet published.
-
-```bash
-python bench/run.py
-```
-
 ## Scope and Roadmap
 
 Planned additions:
 
 - String metrics: Hamming (string variant), BM25-style text ranking helpers
-- Published comparative benchmarks (RapidFuzz / sklearn / faiss baselines)
-- Hosted docs site
 
 ## License
 

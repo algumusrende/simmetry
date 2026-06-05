@@ -95,3 +95,50 @@ def test_pairwise_hamming_shape():
     S = pairwise(X, metric="hamming")
     assert S.shape == (4, 4)
     assert np.allclose(np.diag(S), 1.0)
+
+
+def test_pearson_identical():
+    a = np.array([1.0, 2.0, 3.0])
+    assert similarity(a, a, "pearson") == pytest.approx(1.0)
+
+
+def test_pearson_anti_correlated():
+    a = np.array([1.0, 2.0, 3.0])
+    b = np.array([3.0, 2.0, 1.0])
+    assert similarity(a, b, "pearson") == pytest.approx(-1.0)
+
+
+def test_pearson_constant_vector():
+    a = np.array([5.0, 5.0, 5.0])
+    b = np.array([1.0, 2.0, 3.0])
+    assert similarity(a, b, "pearson") == pytest.approx(0.0)
+
+
+def test_pearson_empty():
+    from simmetry.vectors import pearson
+    assert pearson([], []) == pytest.approx(0.0)
+
+
+def test_pearson_length_mismatch():
+    from simmetry.vectors import pearson
+    with pytest.raises(ValueError):
+        pearson([1.0, 2.0], [1.0, 2.0, 3.0])
+
+
+def test_manhattan_sim_identical():
+    a = np.array([1.0, 2.0, 3.0])
+    assert similarity(a, a, "manhattan_sim") == pytest.approx(1.0)
+
+
+def test_manhattan_sim_monotonic():
+    a = np.array([0.0, 0.0])
+    b = np.array([1.0, 0.0])
+    c = np.array([2.0, 0.0])
+    assert similarity(a, b, "manhattan_sim") > similarity(a, c, "manhattan_sim")
+
+
+def test_manhattan_sim_range():
+    a = np.array([0.0, 0.0])
+    b = np.array([100.0, 100.0])
+    s = similarity(a, b, "manhattan_sim")
+    assert 0.0 < s < 1.0
