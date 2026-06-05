@@ -2,7 +2,7 @@
 
 Similarity scores for **strings**, **vectors**, **points**, and **sets** with a small, NumPy-first API.
 
-[PyPI](https://pypi.org/project/simmetry/) · [GitHub](https://github.com/algumusrende/simmetry) · [Changelog](./CHANGELOG.md)
+[PyPI](https://pypi.org/project/simmetry/) · [GitHub](https://github.com/algumusrende/simmetry) · [Docs](https://algumusrende.github.io/simmetry/) · [Changelog](./CHANGELOG.md)
 
 ## Install
 

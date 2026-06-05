@@ -1,0 +1,51 @@
+site_name: simmetry
+site_description: NumPy-first similarity scores for strings, vectors, points, and sets.
+site_url: https://algumusrende.github.io/simmetry/
+repo_url: https://github.com/algumusrende/simmetry
+repo_name: algumusrende/simmetry
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+
+nav:
+  - Home: index.md
+  - API Reference: api.md
+  - Changelog: changelog.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - admonition
+  - attr_list
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/algumusrende/simmetry
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/simmetry/
