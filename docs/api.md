@@ -23,13 +23,18 @@ Returns a `float` for scalar inputs or an `ndarray` for batch inputs.
 
 ### `pairwise(X, Y=None, metric="cosine")`
 
-Return a pairwise similarity matrix for vector inputs.
+Return a pairwise similarity matrix. Dispatches by input type:
+
+- `list[str]` → `pairwise_strings`
+- list of 2-element numeric tuples/lists → `pairwise_points`
+- NumPy arrays / numeric sequences → `pairwise_numpy` (vectors)
 
 ```python
 from simmetry import pairwise
 
-S = pairwise(X, metric="cosine")          # (m, m) self-similarity
-S = pairwise(X, Y, metric="euclidean_sim") # (m, n)
+S = pairwise(X, metric="cosine")                          # vectors (m, m)
+S = pairwise(["cat", "car"], metric="levenshtein")        # strings (2, 2)
+S = pairwise([(41.0, 29.0), (41.1, 29.1)], metric="haversine_sim")  # points (2, 2)
 ```
 
 ---
@@ -138,6 +143,10 @@ from simmetry.vectors.pairwise import pairwise_numpy
 | `pearson(a, b)` | array-like, array-like | float in [-1, 1] |
 | `hamming(a, b)` | array-like, array-like | float in [0, 1] |
 
+#### `pairwise_numpy(X, Y=None, metric="cosine") → ndarray`
+
+Low-level vectorized pairwise matrix for numeric arrays. Supports all vector metrics. Called internally by `pairwise()` for NumPy inputs.
+
 ---
 
 ## Strings
@@ -147,6 +156,7 @@ from simmetry.strings import (
     levenshtein, levenshtein_distance,
     jaro_winkler,
     ngram_jaccard, token_jaccard,
+    hamming_str, bm25,
     pairwise_strings, topk_strings,
 )
 ```
@@ -158,6 +168,8 @@ from simmetry.strings import (
 | `jaro_winkler(a, b, prefix_scale=0.1, max_prefix=4)` | [0, 1] |
 | `ngram_jaccard(a, b, n=3)` | Character n-gram Jaccard |
 | `token_jaccard(a, b)` | Whitespace-token Jaccard |
+| `hamming_str(a, b)` | Normalized Hamming for equal-length strings; raises on length mismatch |
+| `bm25(query, document, k1=1.5, b=0.75)` | BM25 relevance in [0, 1]; asymmetric ranking helper |
 | `pairwise_strings(A, B=None, metric="levenshtein")` | Returns (m, n) ndarray |
 | `topk_strings(query, corpus, k=10, metric="levenshtein")` | Returns (indices, scores) |
 

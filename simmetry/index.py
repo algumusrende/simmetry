@@ -1,3 +1,5 @@
+"""SimIndex: unified exact and ANN vector similarity index."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

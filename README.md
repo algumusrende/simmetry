@@ -16,7 +16,8 @@ pip install "simmetry[ann]"       # both ANN backends
 
 ## Project Status
 
-- Current version: `1.1.0`
+[![PyPI](https://img.shields.io/pypi/v/simmetry)](https://pypi.org/project/simmetry/)
+
 - Maturity: **Beta** (API stabilising; pin to minor versions in production)
 - Versioning: semantic versioning; breaking changes bump the minor version until `2.0`
 
@@ -33,15 +34,23 @@ similarity((41.1, 29.0), (41.2, 29.1), metric="haversine_sim")  # returns [0, 1]
 similarity({1, 2, 3}, {2, 3, 4}, metric="jaccard")
 ```
 
-### Pairwise matrices (vectors)
+### Pairwise matrices
 
 ```python
 import numpy as np
 from simmetry import pairwise
 
+# Vectors
 X = np.random.randn(1000, 128)
 S = pairwise(X, metric="cosine")          # (1000, 1000)
 D = pairwise(X, metric="cosine_distance") # 1 - cosine, sklearn-compatible
+
+# Strings
+S = pairwise(["cat", "car", "bar"], metric="levenshtein")  # (3, 3)
+
+# Points
+pts = [(41.0, 29.0), (41.1, 29.1), (40.9, 28.9)]
+S = pairwise(pts, metric="haversine_sim")  # (3, 3)
 ```
 
 ### Top-k search (exact)
@@ -88,6 +97,8 @@ available("set")
 | `jaro_winkler` | prefix-weighted character matching |
 | `ngram_jaccard` | character trigram Jaccard (default n=3) |
 | `token_jaccard` | whitespace-token Jaccard |
+| `hamming_str` | normalized Hamming for equal-length strings |
+| `bm25` | BM25 relevance score normalized to [0, 1] |
 
 ### Points / Geo
 
@@ -263,7 +274,8 @@ similarity("foo", "foo", metric="exact_match")  # 1.0
 
 Planned additions:
 
-- String metrics: Hamming (string variant), BM25-style text ranking helpers
+- `pairwise()` cross-type dispatch for composite inputs
+- BM25 corpus-level ranking (multi-document IDF)
 
 ## License
 

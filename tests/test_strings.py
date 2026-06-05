@@ -55,3 +55,61 @@ def test_token_jaccard_empty_strings():
 def test_token_jaccard_one_empty():
     from simmetry.strings import token_jaccard
     assert token_jaccard("", "hello") == pytest.approx(0.0)
+
+
+# hamming_str
+def test_hamming_str_identical():
+    assert similarity("abc", "abc", "hamming_str") == pytest.approx(1.0)
+
+
+def test_hamming_str_all_different():
+    assert similarity("abc", "xyz", "hamming_str") == pytest.approx(0.0)
+
+
+def test_hamming_str_partial():
+    from simmetry.strings import hamming_str
+    assert hamming_str("abcd", "abXd") == pytest.approx(3 / 4)
+
+
+def test_hamming_str_empty():
+    from simmetry.strings import hamming_str
+    assert hamming_str("", "") == pytest.approx(1.0)
+
+
+def test_hamming_str_length_mismatch():
+    from simmetry.strings import hamming_str
+    with pytest.raises(ValueError, match="same length"):
+        hamming_str("ab", "abc")
+
+
+# bm25
+def test_bm25_identical():
+    assert similarity("hello world", "hello world", "bm25") == pytest.approx(1.0)
+
+
+def test_bm25_no_overlap():
+    assert similarity("foo bar", "baz qux", "bm25") == pytest.approx(0.0)
+
+
+def test_bm25_partial_match():
+    s = similarity("hello world", "hello there", "bm25")
+    assert 0.0 < s < 1.0
+
+
+def test_bm25_empty_both():
+    from simmetry.strings import bm25
+    assert bm25("", "") == pytest.approx(1.0)
+
+
+def test_bm25_one_empty():
+    from simmetry.strings import bm25
+    assert bm25("hello", "") == pytest.approx(0.0)
+    assert bm25("", "hello") == pytest.approx(0.0)
+
+
+def test_bm25_asymmetric():
+    from simmetry.strings import bm25
+    # bm25 is not symmetric by design
+    ab = bm25("hello", "hello world")
+    ba = bm25("hello world", "hello")
+    assert ab != pytest.approx(ba)

@@ -4,6 +4,16 @@ All notable changes to **simmetry** will be documented in this file.
 
 The format is based on **Keep a Changelog**, and this project adheres to **Semantic Versioning**.
 
+## [1.2.0] - 2026-06-05
+
+### Added
+- `hamming_str` — normalized Hamming similarity for equal-length strings. Registered as a `string` metric; available in `pairwise_strings` and `topk_strings`.
+- `bm25` — BM25 text relevance score normalized to [0, 1]. Uses term-frequency weighting with uniform IDF; designed as a ranking helper via `topk_strings(..., metric="bm25")`. Registered as a `string` metric.
+- `pairwise()` now dispatches automatically by input type: `list[str]` routes to `pairwise_strings`, lists of 2-element numeric tuples/lists route to `pairwise_points`, NumPy arrays and numeric sequences route to the existing vector implementation.
+- Module docstrings added to `api.py`, `registry.py`, and `index.py`.
+- `pytest-cov` added to `[dev]` extras.
+- PyPI version badge in README (replaces hardcoded version string).
+
 ## [1.1.0] - 2026-06-05
 
 ### Added

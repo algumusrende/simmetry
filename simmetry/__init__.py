@@ -5,6 +5,8 @@ from .index import SimIndex
 from .points.core import euclidean_2d, haversine_km, haversine_sim
 from .registry import available, get, register
 from .sets.core import dice, jaccard, overlap, tversky
+from .strings.bm25 import bm25
+from .strings.hamming import hamming_str
 from .strings.jaro import jaro_winkler
 from .strings.levenshtein import levenshtein
 from .strings.ngrams import ngram_jaccard, token_jaccard
@@ -22,6 +24,8 @@ register("levenshtein", levenshtein, kind="string")
 register("jaro_winkler", jaro_winkler, kind="string")
 register("ngram_jaccard", ngram_jaccard, kind="string")
 register("token_jaccard", token_jaccard, kind="string")
+register("hamming_str", hamming_str, kind="string")
+register("bm25", bm25, kind="string")
 
 register("euclidean_2d", euclidean_2d, kind="point")
 register("haversine_sim", haversine_sim, kind="point")

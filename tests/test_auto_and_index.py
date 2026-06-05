@@ -81,3 +81,52 @@ def test_simindex_query_dim_mismatch_message():
     index = SimIndex(metric="cosine", backend="exact").add(X)
     with pytest.raises(ValueError, match="Query dimension mismatch"):
         index.query(np.random.randn(7).astype("float32"), k=3)
+
+
+def test_pairwise_dispatches_strings():
+    from simmetry import pairwise
+    S = pairwise(["cat", "car", "bar"], metric="levenshtein")
+    assert S.shape == (3, 3)
+    assert np.allclose(np.diag(S), 1.0)
+
+
+def test_pairwise_dispatches_points():
+    from simmetry import pairwise
+    pts = [(41.0, 29.0), (41.1, 29.1), (40.9, 28.9)]
+    S = pairwise(pts, metric="haversine_sim")
+    assert S.shape == (3, 3)
+    assert np.allclose(np.diag(S), 1.0)
+
+
+def test_pairwise_dispatches_cross_strings():
+    from simmetry import pairwise
+    S = pairwise(["cat", "car"], ["bar", "bat", "car"], metric="levenshtein")
+    assert S.shape == (2, 3)
+
+
+def test_register_and_use_custom_metric():
+    from simmetry import available, register, similarity
+    name = "_test_exact_match"
+    if name not in available():
+        register(name, lambda a, b: 1.0 if a == b else 0.0, kind="generic")
+    assert similarity("foo", "foo", name) == pytest.approx(1.0)
+    assert similarity("foo", "bar", name) == pytest.approx(0.0)
+    assert name in available()
+
+
+def test_simindex_hnsw_top_result():
+    hnswlib = pytest.importorskip("hnswlib")  # noqa: F841
+    rng = np.random.default_rng(7)
+    X = rng.standard_normal((200, 16)).astype("float32")
+    idx, scores = SimIndex(metric="cosine", backend="hnsw").add(X).query(X[0], k=5)
+    assert int(idx[0]) == 0
+    assert scores[0] >= scores[-1]
+
+
+def test_simindex_faiss_top_result():
+    pytest.importorskip("faiss")
+    rng = np.random.default_rng(7)
+    X = rng.standard_normal((200, 16)).astype("float32")
+    idx, scores = SimIndex(metric="cosine", backend="faiss").add(X).query(X[0], k=5)
+    assert int(idx[0]) == 0
+    assert scores[0] >= scores[-1]

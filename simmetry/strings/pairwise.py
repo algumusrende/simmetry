@@ -4,13 +4,17 @@ from collections.abc import Callable, Sequence
 
 import numpy as np
 
+from .bm25 import bm25
+from .hamming import hamming_str
 from .jaro import jaro_winkler
 from .levenshtein import levenshtein
 from .ngrams import ngram_jaccard, token_jaccard
 
 _STRING_METRICS: dict[str, Callable[[str, str], float]] = {
-    "levenshtein": levenshtein,
+    "bm25": bm25,
+    "hamming_str": hamming_str,
     "jaro_winkler": jaro_winkler,
+    "levenshtein": levenshtein,
     "ngram_jaccard": ngram_jaccard,
     "token_jaccard": token_jaccard,
 }
@@ -30,7 +34,8 @@ def pairwise_strings(
     if metric not in _STRING_METRICS:
         raise KeyError(
             f"Unknown string metric '{metric}'. "
-            f"Available: {sorted(_STRING_METRICS.keys())}"
+            f"Available: {sorted(_STRING_METRICS.keys())}. "
+            f"For other metrics use similarity() directly."
         )
 
     fn = _STRING_METRICS[metric]

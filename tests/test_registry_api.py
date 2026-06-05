@@ -37,3 +37,18 @@ def test_similarity_vectors_cosine():
 def test_unknown_metric_raises():
     with pytest.raises(KeyError):
         similarity("a", "b", "nonexistent_metric_xyz")
+
+
+def test_available_includes_new_string_metrics():
+    assert "hamming_str" in available("string")
+    assert "bm25" in available("string")
+
+
+def test_similarity_hamming_str():
+    assert similarity("abc", "abc", "hamming_str") == pytest.approx(1.0)
+    assert similarity("abc", "xyz", "hamming_str") == pytest.approx(0.0)
+
+
+def test_similarity_bm25():
+    assert similarity("hello world", "hello world", "bm25") == pytest.approx(1.0)
+    assert similarity("foo", "bar baz", "bm25") == pytest.approx(0.0)

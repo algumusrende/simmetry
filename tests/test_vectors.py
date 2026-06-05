@@ -142,3 +142,15 @@ def test_manhattan_sim_range():
     b = np.array([100.0, 100.0])
     s = similarity(a, b, "manhattan_sim")
     assert 0.0 < s < 1.0
+
+
+def test_nan_propagates_through_cosine():
+    a = np.array([float("nan"), 1.0])
+    b = np.array([1.0, 0.0])
+    assert np.isnan(similarity(a, b, "cosine"))
+
+
+def test_inf_propagates_through_cosine():
+    a = np.array([float("inf"), 0.0])
+    b = np.array([1.0, 0.0])
+    assert np.isnan(similarity(a, b, "cosine"))

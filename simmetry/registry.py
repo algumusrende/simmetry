@@ -1,3 +1,5 @@
+"""Metric registry — register and look up similarity functions by name."""
+
 from __future__ import annotations
 
 from collections.abc import Callable

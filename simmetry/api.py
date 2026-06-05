@@ -1,3 +1,5 @@
+"""Core dispatch API: similarity, pairwise, topk, infer_metric."""
+
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -28,6 +30,20 @@ def _is_matrix_like(x: Any) -> bool:
     if isinstance(x, np.ndarray):
         return x.ndim == 2 and np.issubdtype(x.dtype, np.number)
     return False
+
+
+def _is_string_list(x: Any) -> bool:
+    return isinstance(x, (list, tuple)) and (len(x) == 0 or isinstance(x[0], str))
+
+
+def _is_point_list(x: Any) -> bool:
+    return (
+        isinstance(x, (list, tuple))
+        and len(x) > 0
+        and isinstance(x[0], (tuple, list))
+        and len(x[0]) == 2
+        and all(_is_number(v) for v in x[0])
+    )
 
 
 def _is_point_like(x: Any) -> bool:
@@ -138,16 +154,30 @@ def similarity(
 
 
 def pairwise(X, Y=None, metric: str = "cosine") -> np.ndarray:
-    """Return a pairwise similarity matrix for vector inputs.
+    """Return a pairwise similarity matrix.
+
+    Dispatches automatically based on input type:
+
+    - ``list[str]`` / ``tuple[str]`` → :func:`~simmetry.strings.pairwise_strings`
+    - list of 2-element numeric tuples/lists → :func:`~simmetry.points.pairwise_points`
+    - NumPy arrays / numeric sequences → vector pairwise
 
     Args:
-        X: Array of shape (m, d) or (d,).
-        Y: Array of shape (n, d) or (d,). Defaults to ``X`` (self-similarity).
-        metric: Vector metric name.
+        X: Input data — strings, points, or vectors of shape (m, d).
+        Y: Second set of inputs. Defaults to ``X`` (self-similarity).
+        metric: Metric name appropriate for the input type.
 
     Returns:
         ndarray of shape (m, n).
     """
+    if _is_string_list(X):
+        from .strings.pairwise import pairwise_strings
+        return pairwise_strings(X, Y, metric=metric)
+
+    if _is_point_list(X):
+        from .points.pairwise import pairwise_points
+        return pairwise_points(X, Y, metric=metric)
+
     from .vectors.pairwise import pairwise_numpy
     return pairwise_numpy(X, Y, metric=metric)
 
