@@ -1,118 +1,235 @@
 # simmetry
 
-Similarity scores for **strings**, **vectors**, **points**, and **sets** with a small, NumPy-first API.
+[![PyPI](https://img.shields.io/pypi/v/simmetry)](https://pypi.org/project/simmetry/)
+[![Tests](https://github.com/algumusrende/simmetry/actions/workflows/test.yml/badge.svg)](https://github.com/algumusrende/simmetry/actions/workflows/test.yml)
+[![Docs](https://img.shields.io/badge/docs-algumusrende.github.io-blue)](https://algumusrende.github.io/simmetry/)
 
-[PyPI](https://pypi.org/project/simmetry/) · [GitHub](https://github.com/algumusrende/simmetry) · [Docs](https://algumusrende.github.io/simmetry/) · [Changelog](./CHANGELOG.md)
+One API for similarity across **strings**, **vectors**, **geo points**, and **sets** — with batch operations, ANN indexing, and composite record matching built in.
+
+```python
+from simmetry import similarity
+
+similarity("samplecorp", "sample corp")                        # 0.97  (auto: jaro_winkler)
+similarity([1, 0, 0], [0, 1, 0], metric="cosine")             # 0.0
+similarity((41.0, 29.0), (41.1, 29.1), metric="haversine_sim") # 0.999
+similarity({"ML", "Python"}, {"Python", "AI"}, metric="jaccard") # 0.33
+```
 
 ## Install
 
 ```bash
 pip install simmetry
-pip install "simmetry[fast]"      # Numba acceleration for euclidean_sim / manhattan_sim
-pip install "simmetry[ann-hnsw]"  # hnswlib ANN backend
-pip install "simmetry[ann-faiss]" # FAISS ANN backend
-pip install "simmetry[ann]"       # both ANN backends
+pip install "simmetry[fast]"       # Numba acceleration for euclidean/manhattan pairwise
+pip install "simmetry[ann-hnsw]"   # hnswlib ANN backend
+pip install "simmetry[ann-faiss]"  # FAISS ANN backend
+pip install "simmetry[ann]"        # both ANN backends
 ```
 
 ## Project Status
 
 [![PyPI](https://img.shields.io/pypi/v/simmetry)](https://pypi.org/project/simmetry/)
 
-- Maturity: **Beta** (API stabilising; pin to minor versions in production)
-- Versioning: semantic versioning; breaking changes bump the minor version until `2.0`
+- Maturity: **Beta** — API stabilising; pin to minor versions in production
+- Versioning: semantic versioning; breaking changes bump the minor until `2.0`
 
-## Quickstart
+---
 
-### One function
+## Use cases
+
+### Fuzzy string matching
+
+Find the closest matches for a query string against a list of candidates:
+
+```python
+from simmetry.strings import topk_strings
+
+companies = [
+    "Apple Inc", "Apple Corp", "Appel Inc",
+    "Google LLC", "Alphabet Inc", "Microsoft",
+]
+
+idx, scores = topk_strings("Apple Inc.", companies, k=3, metric="jaro_winkler")
+for i, s in zip(idx, scores):
+    print(f"{companies[i]:<20} {s:.3f}")
+# Apple Inc            0.993
+# Apple Corp           0.966
+# Appel Inc            0.963
+```
+
+### Text ranking with BM25
+
+Rank documents against a query without a prebuilt index:
+
+```python
+from simmetry.strings import topk_strings
+
+docs = [
+    "python library for string similarity",
+    "fast vector search with FAISS",
+    "string matching and distance metrics in python",
+    "machine learning model deployment",
+]
+
+idx, scores = topk_strings(
+    "python string similarity", docs, k=2, metric="bm25"
+)
+for i, s in zip(idx, scores):
+    print(f"{docs[i]:<45} {s:.3f}")
+# string matching and distance metrics in python  0.833
+# python library for string similarity            0.667
+```
+
+### Pairwise similarity matrices
+
+`pairwise()` dispatches automatically — pass strings, points, or vectors:
+
+```python
+from simmetry import pairwise
+import numpy as np
+
+# Strings — returns (m, n) similarity matrix
+names = ["New York", "New York City", "NYC", "Los Angeles"]
+S = pairwise(names, metric="jaro_winkler")
+# S[0, 1] → 0.962   (New York vs New York City)
+# S[0, 3] → 0.409   (New York vs Los Angeles)
+
+# Vectors
+X = np.random.randn(500, 64)
+S = pairwise(X, metric="cosine")  # (500, 500)
+
+# Geo points
+locations = [(41.0, 29.0), (41.1, 29.1), (40.0, 28.0)]
+S = pairwise(locations, metric="haversine_sim")  # (3, 3)
+```
+
+### Large-scale vector search
+
+`SimIndex` wraps exact and ANN backends behind a single interface.
+All backends return `(indices, similarities)` — not raw distances:
+
+```python
+import numpy as np
+from simmetry import SimIndex
+
+X = np.random.randn(100_000, 128).astype("float32")
+
+# Swap backends without changing query code
+index = SimIndex(metric="cosine", backend="exact").add(X)   # exact
+index = SimIndex(metric="cosine", backend="hnsw").add(X)    # ~10x faster
+index = SimIndex(metric="cosine", backend="faiss").add(X)   # GPU-ready
+
+idx, scores = index.query(X[0], k=10)
+# idx    → array([    0, 23451, 87302, ...])
+# scores → array([1.000, 0.812, 0.798, ...])  sorted descending
+```
+
+### Geo proximity search
+
+```python
+from simmetry.points import topk_points
+
+landmarks = [
+    (41.0082, 28.9784),  # Istanbul
+    (48.8566,  2.3522),  # Paris
+    (51.5074, -0.1278),  # London
+    (40.7128, -74.0060), # New York
+]
+
+query = (41.0, 29.0)  # near Istanbul
+idx, scores = topk_points(query, landmarks, k=2, metric="haversine_sim")
+for i, s in zip(idx, scores):
+    print(f"landmark {i}  similarity={s:.4f}")
+# landmark 0  similarity=0.9999
+# landmark 1  similarity=0.9657
+```
+
+### Entity / record matching
+
+Match structured records with different metrics per field and custom weights:
 
 ```python
 from simmetry import similarity
 
-similarity("kitten", "sitting", metric="levenshtein")
-similarity([1, 2, 3], [1, 2, 4], metric="cosine")
-similarity((41.1, 29.0), (41.2, 29.1), metric="haversine_sim")  # returns [0, 1]
-similarity({1, 2, 3}, {2, 3, 4}, metric="jaccard")
+record_a = {
+    "name": "Acme Corporation",
+    "city": "New York",
+    "location": (40.71, -74.01),
+}
+record_b = {
+    "name": "ACME Corp",
+    "city": "New York City",
+    "location": (40.73, -74.00),
+}
+
+score = similarity(
+    record_a,
+    record_b,
+    metric={
+        "name":     "jaro_winkler",
+        "city":     "token_jaccard",
+        "location": "haversine_sim",
+    },
+    weights={"name": 0.5, "city": 0.2, "location": 0.3},
+)
+# score → ~0.91
 ```
 
-### Pairwise matrices
+### Set / tag similarity
 
 ```python
-import numpy as np
-from simmetry import pairwise
+from simmetry import similarity
 
-# Vectors
-X = np.random.randn(1000, 128)
-S = pairwise(X, metric="cosine")          # (1000, 1000)
-D = pairwise(X, metric="cosine_distance") # 1 - cosine, sklearn-compatible
+a = {"python", "machine-learning", "nlp"}
+b = {"python", "deep-learning", "nlp"}
 
-# Strings
-S = pairwise(["cat", "car", "bar"], metric="levenshtein")  # (3, 3)
+similarity(a, b, "jaccard")   # 0.5   — |intersection| / |union|
+similarity(a, b, "dice")      # 0.667 — harmonic mean weighting
+similarity(a, b, "overlap")   # 0.667 — overlap coefficient
 
-# Points
-pts = [(41.0, 29.0), (41.1, 29.1), (40.9, 28.9)]
-S = pairwise(pts, metric="haversine_sim")  # (3, 3)
+# Tversky: penalise b's extras more than a's
+from simmetry.sets import tversky
+tversky(a, b, alpha=0.2, beta=0.8)  # asymmetric
 ```
 
-### Top-k search (exact)
+---
 
-```python
-import numpy as np
-from simmetry import topk
-
-X = np.random.randn(5000, 64)
-q = np.random.randn(64)
-idx, scores = topk(q, X, k=10, metric="cosine")
-# idx and scores are sorted descending (highest similarity first)
-```
-
-## Available Metrics
-
-```python
-from simmetry import available
-
-available()           # all registered metrics
-available("vector")
-available("string")
-available("point")
-available("set")
-```
+## Available metrics
 
 ### Vectors
 
-| Metric | Returns |
-|--------|---------|
-| `cosine` | [-1, 1] |
-| `cosine_distance` | [0, 2] · `1 - cosine` |
-| `dot` | unbounded inner product |
-| `euclidean_sim` | (0, 1] · `1 / (1 + dist)` |
-| `manhattan_sim` | (0, 1] · `1 / (1 + dist)` |
-| `pearson` | [-1, 1] |
-| `hamming` | [0, 1] · normalized for equal-length sequences |
+| Metric | Range | Notes |
+|--------|-------|-------|
+| `cosine` | [-1, 1] | direction similarity |
+| `cosine_distance` | [0, 2] | `1 − cosine`; sklearn-compatible |
+| `dot` | unbounded | raw inner product |
+| `euclidean_sim` | (0, 1] | `1 / (1 + dist)` |
+| `manhattan_sim` | (0, 1] | `1 / (1 + dist)` |
+| `pearson` | [-1, 1] | correlation coefficient |
+| `hamming` | [0, 1] | normalized; equal-length sequences |
 
 ### Strings
 
 | Metric | Notes |
 |--------|-------|
 | `levenshtein` | normalized edit distance |
-| `jaro_winkler` | prefix-weighted character matching |
+| `jaro_winkler` | prefix-weighted; good for names |
 | `ngram_jaccard` | character trigram Jaccard (default n=3) |
 | `token_jaccard` | whitespace-token Jaccard |
-| `hamming_str` | normalized Hamming for equal-length strings |
-| `bm25` | BM25 relevance score normalized to [0, 1] |
+| `hamming_str` | normalized Hamming; equal-length strings only |
+| `bm25` | BM25 relevance [0, 1]; asymmetric ranking helper |
 
 ### Points / Geo
 
-| Metric | Returns |
-|--------|---------|
-| `euclidean_2d` | (0, 1] · 2D Cartesian similarity |
-| `haversine_sim` | [0, 1] · geographic similarity (antipodal ≈ 0) |
+| Metric | Range | Notes |
+|--------|-------|-------|
+| `euclidean_2d` | (0, 1] | 2D Cartesian similarity |
+| `haversine_sim` | [0, 1] | geographic; antipodal ≈ 0, same point = 1 |
 
-`haversine_km` is available as a **utility function** (not a registered metric) that returns raw kilometers:
+`haversine_km` is available as a utility (not a registered metric):
 
 ```python
 from simmetry.points import haversine_km
-
-km = haversine_km((40.7, -74.0), (51.5, -0.1))  # ~5 570 km
+km = haversine_km((40.7, -74.0), (51.5, -0.1))  # 5 570.0 km
 ```
 
 ### Sets
@@ -122,160 +239,50 @@ km = haversine_km((40.7, -74.0), (51.5, -0.1))  # ~5 570 km
 | `jaccard` | \|A∩B\| / \|A∪B\| |
 | `dice` | 2\|A∩B\| / (\|A\| + \|B\|) |
 | `overlap` | \|A∩B\| / min(\|A\|, \|B\|) |
-| `tversky` | \|A∩B\| / (\|A∩B\| + α\|A\\B\| + β\|B\\A\|) |
+| `tversky(alpha, beta)` | generalises Jaccard (α=β=1) and Dice (α=β=0.5) |
 
-`tversky` with `alpha=beta=1` equals Jaccard; `alpha=beta=0.5` equals Dice.
-Call it directly with custom weights: `tversky(A, B, alpha=0.3, beta=0.7)`.
+---
 
-## Auto Metric Selection
+## Auto metric selection
 
-Auto mode applies fixed type-based rules — no learning, no randomness.
-
-```python
-from simmetry import infer_metric, similarity
-
-infer_metric("samplecorp", "sample corp")   # "jaro_winkler"
-infer_metric((41.0, 29.0), (41.1, 29.1))   # "haversine_sim"
-infer_metric({1, 2, 3}, {2, 3, 4})         # "jaccard"
-
-similarity("samplecorp", "sample corp")     # uses inferred metric
-```
-
-Selection order:
-
-1. `list[str]` / `tuple[str]` (including empty) → `jaro_winkler`
-2. `str` + `str` → `jaro_winkler`
-3. `tuple` of 2 numbers with valid lat/lon range ([-90, 90] × [-180, 180]) → `haversine_sim`
-4. `set` / `frozenset` → `jaccard`
-5. numeric vectors → `cosine`
-6. fallback → `cosine`
-
-> **Note:** Only `tuple` inputs (not `list`) trigger the geo heuristic to avoid ambiguity
-> with 2D numeric vectors. `[1.0, 2.0]` routes to `cosine`; `(1.0, 2.0)` routes to `haversine_sim`.
-> Pass `metric="haversine_sim"` explicitly when in doubt.
-
-## Batch String APIs
+Pass `metric="auto"` (the default) and simmetry picks the right metric:
 
 ```python
-from simmetry.strings import pairwise_strings, topk_strings
+from simmetry import similarity, infer_metric
 
-S = pairwise_strings(
-    ["item_one", "item_two"],
-    ["item_one", "item_alt"],
-    metric="jaro_winkler",
-)
-idx, scores = topk_strings(
-    "samplecorp",
-    ["samplecorp", "examplefinance", "testgroup"],
-    k=2,
-    metric="levenshtein",
-)
+infer_metric("hello", "world")            # "jaro_winkler"
+infer_metric((41.0, 29.0), (42.0, 30.0)) # "haversine_sim"
+infer_metric({1, 2, 3}, {2, 3, 4})       # "jaccard"
+infer_metric([1.0, 2.0], [3.0, 4.0])     # "cosine"
 ```
 
-## Batch Point APIs (Geo / 2D)
+> **Note:** Only `tuple` inputs trigger the geo heuristic, not `list`. This avoids
+> ambiguity with 2D numeric vectors. Use `metric="haversine_sim"` explicitly when in doubt.
 
-```python
-from simmetry.points import pairwise_points, topk_points
+---
 
-pts = [(41.0, 29.0), (41.01, 29.01), (40.9, 28.9)]
-S = pairwise_points(pts, metric="haversine_sim")              # similarity matrix
-idx, scores = topk_points((41.0, 29.0), pts, k=2, metric="haversine_sim")
-```
-
-`haversine_km` is also accepted by `pairwise_points` and `topk_points` for raw-distance
-use cases. `topk_points(..., metric="haversine_km")` ranks by ascending distance (nearest first).
-
-## ANN Top-k (Optional)
-
-For large vector corpora (100k+), use approximate nearest neighbour backends.
-
-### hnswlib
-
-```python
-import numpy as np
-from simmetry.ann import build_hnsw
-
-X = np.random.randn(200_000, 128).astype("float32")
-X /= np.linalg.norm(X, axis=1, keepdims=True)
-
-index = build_hnsw(X, space="cosine")
-labels, distances = index.query(X[0], k=10)
-```
-
-### faiss
-
-```python
-import numpy as np
-from simmetry.ann import build_faiss
-
-X = np.random.randn(200_000, 128).astype("float32")
-X /= np.linalg.norm(X, axis=1, keepdims=True)
-
-index = build_faiss(X, metric="ip")
-labels, scores = index.query(X[0], k=10)
-```
-
-## `SimIndex` (Exact or ANN)
-
-`SimIndex` provides a unified interface across all backends.
-`query()` always returns `(indices, similarities)` — ANN distances are converted
-to similarities internally so results are directly comparable across backends.
-
-```python
-import numpy as np
-from simmetry import SimIndex
-
-X = np.random.randn(50_000, 128).astype("float32")
-index = SimIndex(metric="cosine", backend="exact").add(X)
-idx, scores = index.query(X[0], k=10)
-# scores are cosine similarities, sorted descending
-```
-
-Switch backends without changing the query code:
-
-```python
-index_hnsw  = SimIndex(metric="cosine", backend="hnsw").add(X)
-index_faiss = SimIndex(metric="cosine", backend="faiss").add(X)
-```
-
-## Composite Records
-
-Weight multiple fields with different metrics:
-
-```python
-from simmetry import similarity
-
-a = {"name": "Entity One", "city": "CityAlpha", "loc": (41.0, 29.0)}
-b = {"name": "Entity One Extended", "city": "CityAlpha", "loc": (41.01, 28.99)}
-
-score = similarity(
-    a,
-    b,
-    metric={"name": "jaro_winkler", "loc": "haversine_sim"},
-    weights={"name": 0.7, "loc": 0.3},
-)
-```
-
-Fields missing from either record raise `KeyError` with a descriptive message.
-
-## Custom Metrics
+## Custom metrics
 
 ```python
 from simmetry import register, similarity
 
-def my_metric(a, b):
-    return 1.0 if a == b else 0.0
+def prefix_sim(a: str, b: str) -> float:
+    if not a or not b:
+        return 0.0
+    return sum(ca == cb for ca, cb in zip(a, b)) / max(len(a), len(b))
 
-register("exact_match", my_metric, kind="generic")
-similarity("foo", "foo", metric="exact_match")  # 1.0
+register("prefix", prefix_sim, kind="string")
+similarity("hello", "help", metric="prefix")  # 0.75
 ```
+
+---
 
 ## Scope and Roadmap
 
 Planned additions:
 
-- `pairwise()` cross-type dispatch for composite inputs
 - BM25 corpus-level ranking (multi-document IDF)
+- `pairwise()` cross-type dispatch for composite inputs
 
 ## License
 

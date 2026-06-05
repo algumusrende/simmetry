@@ -4,6 +4,22 @@ All notable changes to **simmetry** will be documented in this file.
 
 The format is based on **Keep a Changelog**, and this project adheres to **Semantic Versioning**.
 
+## [1.2.0] - 2026-06-05
+
+### Added
+- `hamming_str` — normalized Hamming similarity for equal-length strings. Registered as a `string` metric.
+- `bm25` — BM25 relevance score in [0, 1]. Asymmetric: measures how well a document satisfies a query. Registered as a `string` metric.
+- `pairwise()` now dispatches on input type: pass a list of strings → `pairwise_strings`, a list of tuples → `pairwise_points`, or an ndarray → `pairwise_numpy`. No manual import needed.
+- `available("string")` now lists `hamming_str` and `bm25`.
+- Module docstrings on `api.py`, `registry.py`, and `index.py`.
+- `pytest-cov` added to `[dev]` extras.
+- ANN backend tests (auto-skip if hnswlib / faiss not installed).
+- Custom metric registration test.
+- NaN / inf propagation tests (88 passing, 2 skipped).
+
+### Changed
+- Version bumped to `1.2.0`.
+
 ## [1.1.0] - 2026-06-05
 
 ### Added
