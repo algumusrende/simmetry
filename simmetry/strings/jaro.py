@@ -46,6 +46,7 @@ def _jaro(a: str, b: str) -> float:
 
 
 def jaro_winkler(a: str, b: str, prefix_scale: float = 0.1, max_prefix: int = 4) -> float:
+    """Jaro-Winkler similarity in [0, 1]; boosts strings that share a common prefix."""
     j = _jaro(a, b)
     p = 0
     for ca, cb in zip(a, b, strict=False):

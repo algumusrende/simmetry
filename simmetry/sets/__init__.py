@@ -1,3 +1,3 @@
-from .core import dice, jaccard, overlap
+from .core import dice, jaccard, overlap, tversky
 
-__all__ = ["dice", "jaccard", "overlap"]
+__all__ = ["dice", "jaccard", "overlap", "tversky"]

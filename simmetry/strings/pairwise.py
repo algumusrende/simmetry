@@ -21,19 +21,24 @@ def pairwise_strings(
     B: Sequence[str] | None = None,
     metric: str = "levenshtein",
 ) -> np.ndarray:
-    """Return a pairwise string similarity matrix for the selected metric."""
+    """Return an (m, n) pairwise similarity matrix for string inputs.
+
+    ``metric`` must be one of ``levenshtein``, ``jaro_winkler``, ``ngram_jaccard``,
+    or ``token_jaccard``.
+    """
     metric = metric.lower().strip()
     if metric not in _STRING_METRICS:
-        raise KeyError(f"Unknown string metric for pairwise_strings: {metric}")
+        raise KeyError(
+            f"Unknown string metric '{metric}'. "
+            f"Available: {sorted(_STRING_METRICS.keys())}"
+        )
 
     fn = _STRING_METRICS[metric]
     if B is None:
         B = A
 
-    m = len(A)
-    n = len(B)
+    m, n = len(A), len(B)
     out = np.empty((m, n), dtype=np.float64)
-
     for i in range(m):
         ai = A[i]
         for j in range(n):
@@ -47,11 +52,14 @@ def topk_strings(
     k: int = 10,
     metric: str = "levenshtein",
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Return exact top-k string matches by scoring against the full corpus."""
+    """Return top-k string matches sorted by similarity descending.
+
+    Returns ``(indices, scores)``.
+    """
     S = pairwise_strings([query], corpus, metric=metric).reshape(-1)
     k = int(k)
     if k <= 0:
-        raise ValueError("k must be >= 1")
+        raise ValueError("k must be >= 1.")
     k = min(k, S.shape[0])
     idx = np.argpartition(-S, kth=k - 1)[:k]
     idx = idx[np.argsort(-S[idx])]
